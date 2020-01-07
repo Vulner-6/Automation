@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeUnit;
 
 public class TestOkHttp3
@@ -74,6 +75,7 @@ public class TestOkHttp3
             public void onFailure(@NotNull Call call, @NotNull IOException e)
             {
                 e.printStackTrace();
+
             }
 
             @Override
@@ -108,5 +110,104 @@ public class TestOkHttp3
         {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 测试同步发送POST请求，提交表单数据
+     */
+    @Test
+    void SynchronousPostFormParameters()
+    {
+        //构造请求包包体参数、值
+        RequestBody formBody = new FormBody.Builder()
+                .add("search", "Jurassic Park")
+                .build();
+        //构造完整的请求包
+        Request request = new Request.Builder()
+                .url("https://en.wikipedia.org/w/index.php")
+                .post(formBody)
+                .header("User-Agent", "OkHttp Headers.java")
+                .addHeader("Accept", "application/json; q=0.5")
+                .addHeader("Accept", "application/vnd.github.v3+json")
+                .build();
+        try
+        {
+            Response response=okHttpClient.newCall(request).execute();
+            if(!response.isSuccessful())
+            {
+                throw new IOException("Unexpected code " + response);
+            }
+            System.out.println(response.body().string());
+        }
+        catch (SocketTimeoutException e)
+        {
+            System.out.println("连接超时");
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 测试异步发送POST请求，提交表单数据
+     */
+    @Test
+    void AsynchronousPostFormParameters()
+    {
+        //构造请求包包体参数、值
+        RequestBody formBody = new FormBody.Builder()
+                .add("search", "Jurassic Park")
+                .build();
+        //构造完整的请求包
+        Request request = new Request.Builder()
+                .url("https://en.wikipedia.org/w/index.php")
+                .post(formBody)
+                .header("User-Agent", "OkHttp Headers.java")
+                .addHeader("Accept", "application/json; q=0.5")
+                .addHeader("Accept", "application/vnd.github.v3+json")
+                .build();
+
+        //异步方式发送POST请求包，提交表单数据，以下程序都在子线程中运行，因此主线程无法得到打印结果。
+        okHttpClient.newCall(request).enqueue(new Callback()
+        {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response)
+            {
+                try
+                {
+                    if(!response.isSuccessful())
+                    {
+                        throw new IOException("Unexpected code " + response);
+                    }
+                    System.out.println(response.body().string());
+                }
+                catch (SocketTimeoutException e)
+                {
+                    System.out.println("连接超时");
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        try
+        {
+            Thread.currentThread().join();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+
     }
 }
