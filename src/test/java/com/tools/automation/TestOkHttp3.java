@@ -1,5 +1,6 @@
 package com.tools.automation;
 
+import com.tools.automation.support.HttpsUtils;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class TestOkHttp3
     {
         //构造GET请求
         Request request=new Request.Builder()
-                .url("https://www.baidu.com")
+                .url("https://blog.sydy1314.com/")
                 .header("User-Agent", "OkHttp Headers.java")
                 .addHeader("Accept", "application/json; q=0.5")
                 .addHeader("Accept", "application/vnd.github.v3+json")
@@ -208,6 +209,29 @@ public class TestOkHttp3
             e.printStackTrace();
         }
 
+
+    }
+
+    @Test
+    void httpsTrustAll()
+    {
+        HttpsUtils httpsUtils=new HttpsUtils();
+        OkHttpClient client=httpsUtils.getTrustAllClient();
+        Request request=new Request.Builder()
+                .url("http://120.79.60.99/80.html")
+                .header("User-Agent", "OkHttp Headers.java")
+                .addHeader("Accept", "application/json; q=0.5")
+                .addHeader("Accept", "application/vnd.github.v3+json")
+                .build();
+        try
+        {
+            Response response=client.newCall(request).execute();
+            System.out.println(response.body().string());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
     }
 }
