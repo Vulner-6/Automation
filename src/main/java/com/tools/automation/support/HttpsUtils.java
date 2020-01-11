@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
  * 若是HTTPS协议，那么就用这里的getTrustAllClient()方法，获取OkHttpClient对象
  * 封装了okhttp的https请求，配置信任所有证书，具体细节我还不是太懂
  */
+
 public class HttpsUtils {
     //设置连接超时时间、读取时间、写入时间
     private Integer connectionTimeout=10;

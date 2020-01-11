@@ -1,14 +1,17 @@
 package com.tools.automation.model;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class IpProxyPool
 {
     private Long id;
     private String site;
-    private Long gmtCreate;
+    private String gmtCreate;
     private String ipAddress;
-    private int port;
+    private String port;
     private String protocol;
-    private int delayTime;
+    private String delayTime;
 
     public Long getId()
     {
@@ -30,12 +33,12 @@ public class IpProxyPool
         this.site = site;
     }
 
-    public Long getGmtCreate()
+    public String getGmtCreate()
     {
         return gmtCreate;
     }
 
-    public void setGmtCreate(Long gmtCreate)
+    public void setGmtCreate(String gmtCreate)
     {
         this.gmtCreate = gmtCreate;
     }
@@ -50,12 +53,12 @@ public class IpProxyPool
         this.ipAddress = ipAddress;
     }
 
-    public int getPort()
+    public String getPort()
     {
         return port;
     }
 
-    public void setPort(int port)
+    public void setPort(String port)
     {
         this.port = port;
     }
@@ -70,12 +73,12 @@ public class IpProxyPool
         this.protocol = protocol;
     }
 
-    public int getDelayTime()
+    public String getDelayTime()
     {
         return delayTime;
     }
 
-    public void setDelayTime(int delayTime)
+    public void setDelayTime(String delayTime)
     {
         this.delayTime = delayTime;
     }

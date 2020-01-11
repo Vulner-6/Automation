@@ -1,6 +1,25 @@
-<html>
-<head>test</head>
-</html>
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>自动化工具</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/bootstrap-theme.css">
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+</head>
 <body>
-<h1>test</h1>
+<!--引入navigation.html中的模板-->
+<div th:insert="~{navigation::nav}"></div>
+<div class="row">
+    <div class="col-sm-6 col-md-4">
+        <div class="thumbnail">
+            <div class="caption">
+                <h3>IP代理池</h3>
+                <p>该功能，可以更新维护数据库中的代理IP相关信息，以便于爬虫、漏洞扫描时使用。</p>
+                <p><a href="/ipProxyPool" class="btn btn-primary" role="button">点击进入</a></p>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
+</html>
