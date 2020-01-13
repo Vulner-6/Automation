@@ -19,7 +19,7 @@
                    class="btn btn-default btn-lg col-xs-12 col-sm-4 col-md-4 col-lg-4">获取最新IP
             代理信息</button>
         </a>
-        <a href="#">
+        <a href="/checkIpProxy">
             <button type="button" class="btn btn-default btn-lg col-xs-12 col-sm-4 col-md-4 col-lg-4">更新/测试已有IP
                 代理</button>
         </a>
@@ -27,6 +27,7 @@
     </p>
     <!--数据显示表格-->
     <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+        <h3>数据库中的免费代理数量为：<span th:text="${sum}">0</span></h3>
         <table class="table table-hover table-bordered">
             <tr>
                 <th>#</th>
