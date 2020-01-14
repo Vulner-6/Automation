@@ -31,7 +31,6 @@ public class GetIpProxy
         String intr="intr/";
         String url="";
         ArrayList<IpProxyPool> ipProxyPoolArrayList=new ArrayList<IpProxyPool>();
-        Long sum=0l;
         for(int i=1;i<=6;i++)
         {
             //无论如何，都只获取高匿IP和普通IP的前三页
@@ -90,8 +89,6 @@ public class GetIpProxy
                     if(tempNum==7)
                     {
                         tempNum=1;
-                        sum++;
-                        ipProxyPool.setId(sum);
                         ipProxyPoolArrayList.add(ipProxyPool);
                         ipProxyPool=new IpProxyPool();   //这里重新申请一块内存给这个对象
                         continue;
