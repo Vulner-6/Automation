@@ -1,24 +1,29 @@
 package com.tools.automation.support;
 
+import com.tools.automation.mapper.IpProxyPoolMapper;
 import com.tools.automation.model.IpProxyPool;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 爬取不同网站的IP代理，并返回封装好的model对象
  */
 @Service
-public class GetIpProxy
+public class IpProxyPoolSupport
 {
+    @Autowired
+    private IpProxyPoolMapper ipProxyPoolMapper;
     /**
      * 只返回快代理网站的前三页。
      * @param okHttpClient
@@ -113,5 +118,76 @@ public class GetIpProxy
 
         }
         return ipProxyPoolArrayList;
+    }
+
+    public void checkIpProxyPool(OkHttpClient okHttpClient,CountDownLatch latch)
+    {
+        //使用代理挨个访问百度，超时超过5秒的就删除，否则保留。
+        //构造GET请求
+        Request request=new Request.Builder()
+                .url("http://www.mof.gov.cn/index.htm")
+                .header("User-Agent", "OkHttp Headers.java")
+                .addHeader("Accept", "application/json; q=0.5")
+                .addHeader("Accept", "application/vnd.github.v3+json")
+                .build();
+        //重新设置OkHttpClient的超时时间,最大并发数
+        okHttpClient.newBuilder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(3, TimeUnit.SECONDS)
+                .writeTimeout(2, TimeUnit.SECONDS)
+                .build();
+        //设置并发数，针对单个主机并发数为64
+        okHttpClient.dispatcher().setMaxRequestsPerHost(64);
+        //获取数据库中所有代理
+        ArrayList<IpProxyPool> ipProxyPoolArrayList=ipProxyPoolMapper.selectAll();
+
+        for (IpProxyPool ip:ipProxyPoolArrayList)
+        {
+            System.setProperty("http.proxySet", "true");
+            System.setProperty("http.proxyHost", ip.getIpAddress());
+            System.setProperty("http.proxyPort", ip.getPort());
+
+            //异步发送请求，若状态码为200，则下一轮循环，否则删除对应的记录
+            okHttpClient.newCall(request).enqueue(new Callback()
+            {
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e)
+                {
+                    ipProxyPoolMapper.deleteByIpAddress(ip);
+                    System.out.println("连接超时,已经删除IP："+ip.getIpAddress());
+                    latch.countDown();
+                }
+
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response)
+                {
+                    try
+                    {
+                        //重写的方法里，自动传入response了
+                        if(!response.isSuccessful())
+                        {
+                            throw new IOException("Unexpected code " + response);
+                        }
+                        //判断状态码
+                        if(response.code()!=200)
+                        {
+                            //删除这个IP对应的记录
+                            System.out.println("该IP状态码不是200："+ip.getIpAddress()+":"+ip.getPort());
+                            ipProxyPoolMapper.deleteByIpAddress(ip);
+                        }
+                        else
+                        {
+                            System.out.println("可用IP："+ip.getIpAddress()+":"+ip.getPort());
+                        }
+
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    latch.countDown();
+                }
+            });
+        }
     }
 }
