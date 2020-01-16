@@ -2,6 +2,7 @@ package com.tools.automation.controller;
 
 import com.tools.automation.mapper.IpProxyPoolMapper;
 import com.tools.automation.model.IpProxyPool;
+import com.tools.automation.support.AutoGetIp;
 import com.tools.automation.support.HttpsUtils;
 import com.tools.automation.support.IpProxyPoolSupport;
 import okhttp3.OkHttpClient;
@@ -35,7 +36,6 @@ public class IpProxyPoolController
     @GetMapping("getNewIpProxy")
     public String getNewIpProxy(Model model)
     {
-        //关闭HTTP代理，使用本机IP
         ArrayList<IpProxyPool> ipProxyPoolArrayList =this.ipProxyPoolSupport.getKuaiDaiLi(this.okHttpClient);
         model.addAttribute("ipProxyArrayList",ipProxyPoolArrayList);
         //插入获取到的ip代理信息到数据库
@@ -74,11 +74,22 @@ public class IpProxyPoolController
         return "ipProxyPool";
     }
 
-    //一键自动化维护
+    //自动化维护IP池，每次刷新，服务器端都只返回能用的IP
     @GetMapping("/autoManagement")
     public String autoManagement()
     {
-        return "autoManagement";
+        //测试线程1是否好用
+        AutoGetIp autoGetIp=new AutoGetIp(this.okHttpClient,this.ipProxyPoolMapper);
+        Thread testAutoGetIp=new Thread(autoGetIp);
+        testAutoGetIp.start();
+
+        //线程2
+        //定时（1分钟）数据库中读取IP信息
+        //多线程请求指定网站，验证数据库中IP是否可用
+            //不可用，直接删除
+
+        //主线程，每次刷新，都打印数据库中的信息
+        return "ipProxyPool";
     }
 
 }
