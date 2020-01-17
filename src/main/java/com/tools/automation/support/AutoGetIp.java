@@ -14,7 +14,7 @@ public class AutoGetIp implements Runnable
 {
     //手动初始化IpProxyPoolSupport
     private IpProxyPoolSupport ipProxyPoolSupport=new IpProxyPoolSupport();
-    private IpProxyPoolMapper ipProxyPoolMapper;
+    private IpProxyPoolMapper ipProxyPoolMapper;   //这个需要外部传入，子线程无法使用Autowired注解
     //声明一个OkHttpClient，用于接收传入的OkHttpClient
     private OkHttpClient okHttpClient;
     @Override

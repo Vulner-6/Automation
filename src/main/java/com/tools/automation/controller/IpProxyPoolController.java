@@ -2,6 +2,7 @@ package com.tools.automation.controller;
 
 import com.tools.automation.mapper.IpProxyPoolMapper;
 import com.tools.automation.model.IpProxyPool;
+import com.tools.automation.support.AutoCheckIp;
 import com.tools.automation.support.AutoGetIp;
 import com.tools.automation.support.HttpsUtils;
 import com.tools.automation.support.IpProxyPoolSupport;
@@ -83,10 +84,12 @@ public class IpProxyPoolController
         Thread testAutoGetIp=new Thread(autoGetIp);
         testAutoGetIp.start();
 
-        //线程2
-        //定时（1分钟）数据库中读取IP信息
-        //多线程请求指定网站，验证数据库中IP是否可用
-            //不可用，直接删除
+        //测试线程2是否好用
+        AutoCheckIp autoCheckIp=new AutoCheckIp(this.okHttpClient,this.ipProxyPoolMapper);
+        Thread testAutoCheckIp=new Thread(autoCheckIp);
+        testAutoCheckIp.start();
+
+
 
         //主线程，每次刷新，都打印数据库中的信息
         return "ipProxyPool";
