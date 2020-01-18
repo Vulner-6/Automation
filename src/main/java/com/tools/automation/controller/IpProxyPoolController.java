@@ -13,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
 
 @Controller
 public class IpProxyPoolController
@@ -27,12 +26,34 @@ public class IpProxyPoolController
     @Autowired
     private IpProxyPoolMapper ipProxyPoolMapper;
 
+    //设置一个开关，保证每次刷新一个页面不会开启新的线程
+    private int threadSwitch=0;
     @GetMapping("ipProxyPool")
-    public String ipProxyPool()
+    public String ipProxyPool(Model model)
     {
+        if(threadSwitch==0)
+        {
+            //测试线程1是否好用
+            AutoGetIp autoGetIp=new AutoGetIp(this.okHttpClient,this.ipProxyPoolMapper);
+            Thread testAutoGetIp=new Thread(autoGetIp);
+            testAutoGetIp.start();
+
+            //测试线程2是否好用
+            AutoCheckIp autoCheckIp=new AutoCheckIp(this.okHttpClient,this.ipProxyPoolMapper);
+            Thread testAutoCheckIp=new Thread(autoCheckIp);
+            testAutoCheckIp.start();
+        }
+        //赋值为1，代表线程已经开启了，以后刷新页面，就不会再开启新的线程了。除非服务器重启，重新加载类，才会再次开启线程。
+        this.threadSwitch=1;
+
+        //打印数据库中IP信息
+        ArrayList<IpProxyPool> ipProxyPoolArrayList=new ArrayList<IpProxyPool>();
+        ipProxyPoolArrayList=ipProxyPoolMapper.selectAll();
+        model.addAttribute("sum",ipProxyPoolArrayList.size());
+        model.addAttribute("ipProxyPoolArrayList",ipProxyPoolArrayList);
         return "ipProxyPool";
     }
-
+/*
     //爬取新的一批IP
     @GetMapping("getNewIpProxy")
     public String getNewIpProxy(Model model)
@@ -75,24 +96,31 @@ public class IpProxyPoolController
         return "ipProxyPool";
     }
 
+
     //自动化维护IP池，每次刷新，服务器端都只返回能用的IP
     @GetMapping("/autoManagement")
     public String autoManagement()
     {
-        //测试线程1是否好用
-        AutoGetIp autoGetIp=new AutoGetIp(this.okHttpClient,this.ipProxyPoolMapper);
-        Thread testAutoGetIp=new Thread(autoGetIp);
-        testAutoGetIp.start();
+        if(threadSwitch==0)
+        {
+            //测试线程1是否好用
+            AutoGetIp autoGetIp=new AutoGetIp(this.okHttpClient,this.ipProxyPoolMapper);
+            Thread testAutoGetIp=new Thread(autoGetIp);
+            testAutoGetIp.start();
 
-        //测试线程2是否好用
-        AutoCheckIp autoCheckIp=new AutoCheckIp(this.okHttpClient,this.ipProxyPoolMapper);
-        Thread testAutoCheckIp=new Thread(autoCheckIp);
-        testAutoCheckIp.start();
-
-
+            //测试线程2是否好用
+            AutoCheckIp autoCheckIp=new AutoCheckIp(this.okHttpClient,this.ipProxyPoolMapper);
+            Thread testAutoCheckIp=new Thread(autoCheckIp);
+            testAutoCheckIp.start();
+        }
+        //赋值为1，代表线程已经开启了，以后刷新页面，就不会再开启新的线程了。除非服务器重启，重新加载类，才会再次开启线程。
+        this.threadSwitch=1;
 
         //主线程，每次刷新，都打印数据库中的信息
         return "ipProxyPool";
     }
+    */
+
+
 
 }
