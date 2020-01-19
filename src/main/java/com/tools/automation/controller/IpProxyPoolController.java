@@ -31,6 +31,7 @@ public class IpProxyPoolController
     @GetMapping("ipProxyPool")
     public String ipProxyPool(Model model)
     {
+        model.addAttribute("selectClass","list-group-item active");
         if(threadSwitch==0)
         {
             //测试线程1是否好用
@@ -53,74 +54,4 @@ public class IpProxyPoolController
         model.addAttribute("ipProxyPoolArrayList",ipProxyPoolArrayList);
         return "ipProxyPool";
     }
-/*
-    //爬取新的一批IP
-    @GetMapping("getNewIpProxy")
-    public String getNewIpProxy(Model model)
-    {
-        ArrayList<IpProxyPool> ipProxyPoolArrayList =this.ipProxyPoolSupport.getKuaiDaiLi(this.okHttpClient);
-        model.addAttribute("ipProxyArrayList",ipProxyPoolArrayList);
-        //插入获取到的ip代理信息到数据库
-        for(IpProxyPool ipProxyPool:ipProxyPoolArrayList)
-        {
-            this.ipProxyPoolMapper.insert(ipProxyPool);
-        }
-        //获取数据库中可用IP的总数
-        Integer sum=this.ipProxyPoolMapper.ipProxyPoolCount();
-        model.addAttribute("sum",sum);
-        return "ipProxyPool";
-    }
-
-    //检验数据库中代理IP的可用性
-    @GetMapping("/checkIpProxy")
-    public String checkIpProxy(Model model)
-    {
-        //使用线程计数器，当计数器为0时，主线程再继续运行
-        final CountDownLatch latch = new CountDownLatch(ipProxyPoolMapper.ipProxyPoolCount());
-        ipProxyPoolSupport.checkIpProxyPool(okHttpClient,latch);
-        try
-        {
-            //等待上面的计数器变成0，再运行主线程，打印结果
-            latch.await();
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-        //将数据库中内容输出到页面
-        ArrayList<IpProxyPool> ipProxyPoolArrayList1=ipProxyPoolMapper.selectAll();
-        model.addAttribute("ipProxyArrayList",ipProxyPoolArrayList1);
-        model.addAttribute("sum",ipProxyPoolMapper.ipProxyPoolCount());
-        System.out.println("数据库中目前IP数量："+ipProxyPoolMapper.ipProxyPoolCount());
-
-        return "ipProxyPool";
-    }
-
-
-    //自动化维护IP池，每次刷新，服务器端都只返回能用的IP
-    @GetMapping("/autoManagement")
-    public String autoManagement()
-    {
-        if(threadSwitch==0)
-        {
-            //测试线程1是否好用
-            AutoGetIp autoGetIp=new AutoGetIp(this.okHttpClient,this.ipProxyPoolMapper);
-            Thread testAutoGetIp=new Thread(autoGetIp);
-            testAutoGetIp.start();
-
-            //测试线程2是否好用
-            AutoCheckIp autoCheckIp=new AutoCheckIp(this.okHttpClient,this.ipProxyPoolMapper);
-            Thread testAutoCheckIp=new Thread(autoCheckIp);
-            testAutoCheckIp.start();
-        }
-        //赋值为1，代表线程已经开启了，以后刷新页面，就不会再开启新的线程了。除非服务器重启，重新加载类，才会再次开启线程。
-        this.threadSwitch=1;
-
-        //主线程，每次刷新，都打印数据库中的信息
-        return "ipProxyPool";
-    }
-    */
-
-
-
 }
