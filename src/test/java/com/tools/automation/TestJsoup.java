@@ -14,5 +14,6 @@ public class TestJsoup
         String html = "<td data-title=\"IP\">223.241.116.127</td>";
         Document doc= Jsoup.parseBodyFragment(html);
         System.out.println(doc.text());
+        System.out.println(doc.select("116"));
     }
 }
