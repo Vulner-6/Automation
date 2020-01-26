@@ -47,14 +47,9 @@ public class VulScanController
         //读取文件内容，进行批量验证
         else
         {
+            //存储上传的文件
             FileOperation.storeFile(targetsInputFile,"E:\\Programming\\Projects\\automation\\uploadFiles\\");
         }
-
-
-
-
-
-
         return "universalScan";
     }
 
