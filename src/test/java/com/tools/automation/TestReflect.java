@@ -35,8 +35,8 @@ public class TestReflect
                 Object obj=cls.newInstance();
                 Method method=cls.getMethod(methodName);  //获取方法对象
                 //5.有方法对象，有类对象，那么就可以执行方法了
-                method.invoke(obj);
-
+                Class<OkHttpClient> c=OkHttpClient.class;
+                okHttpClient=c.cast(method.invoke(obj));
             }
 
         }

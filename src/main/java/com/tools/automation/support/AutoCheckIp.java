@@ -41,9 +41,17 @@ public class AutoCheckIp implements Runnable
             {
                 for(IpProxyPool ip:this.ipProxyPoolArrayList)
                 {
-                    System.setProperty("http.proxySet", "true");
-                    System.setProperty("http.proxyHost", ip.getIpAddress());
-                    System.setProperty("http.proxyPort", ip.getPort());
+                    if(ip!=null&&ip.getPort()!=null&&ip.getIpAddress()!=null)
+                    {
+                        System.setProperty("http.proxySet", "true");
+                        System.setProperty("http.proxyHost", ip.getIpAddress());
+                        System.setProperty("http.proxyPort", ip.getPort());
+                    }
+                    else
+                    {
+                        System.out.println("出现java.lang.NullPointerException异常！位置：AutoCheckip.java的52行");
+                        break;
+                    }
 
                     //异步发送请求，若状态码为200，则下一轮循环，否则删除对应的记录
                     okHttpClient.newCall(request).enqueue(new Callback()
