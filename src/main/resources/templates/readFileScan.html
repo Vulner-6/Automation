@@ -12,16 +12,11 @@
 <div th:insert="~{navigation::nav}"></div>
 <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
     <div>
-        <button><a class="navbar-brand" href="#">手动填写单个目标</a></button>
-        <button><a class="navbar-brand" href="#">上传包含多个目标的txt文件</a></button>
+        <button><a class="navbar-brand" href="/singleScan">手动填写单个目标</a></button>
+        <button><a class="navbar-brand" href="/readFileScan">上传包含多个目标的txt文件</a></button>
         <button><a class="navbar-brand" href="#">利用第三方搜索引擎获取目标</a></button>
     </div>
-    <form method="post" action="/universalScan" enctype='multipart/form-data'>
-        <div class="form-group">
-            <label for="target">单个目标</label>
-            <input type="text" class="form-control" id="target" name="target" placeholder="例如：https://www.baidu.com">
-        </div>
-
+    <form method="post" action="/readFileScan" enctype='multipart/form-data'>
         <div class="form-group">
             <label for="targetsInputFile">扫描文件</label>
             <input type="file" id="targetsInputFile" name="targetsInputFile">
@@ -29,17 +24,17 @@
         </div>
         <div >
             <label>
-                <input type="checkbox"> 全部选择
+                <input type="checkbox" > 全部选择
             </label>
         </div>
         <div class="checkbox">
             <label>
-                <input type="checkbox" name="thinkphp5_rce" value="selected"> ThinkPHP_5.0.12远程代码执行漏洞
+                <input type="checkbox" name="poc" value="thinkPHP_RCE"> ThinkPHP_5.0.12远程代码执行漏洞
             </label>
         </div>
         <div class="checkbox">
             <label>
-                <input type="checkbox"> xxx漏洞
+                <input type="checkbox" name="poc"> xxx漏洞
             </label>
         </div>
         <button type="submit" class="btn btn-default">提交</button>

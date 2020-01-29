@@ -98,4 +98,9 @@ public class UniversalScan
         }
         return hashMap;
     }
+
+    public void testPrint(String str)
+    {
+        System.out.println("测试反射调用方法打印成功！"+str);
+    }
 }
