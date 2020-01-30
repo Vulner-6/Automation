@@ -15,8 +15,8 @@ import java.lang.reflect.Method;
 public class VulScanController
 {
     private HttpsUtils httpsUtils=new HttpsUtils();
-    public OkHttpClient okHttpClient=httpsUtils.getTrustAllClient();
-    public Class cls;
+    private OkHttpClient okHttpClient=httpsUtils.getTrustAllClient();
+    private Class cls;
 
     /**
      * 加载漏洞具体实现类进来。（我是一个漏洞写一个类呢？还是一个类中写多个漏洞的方法呢？）
@@ -60,10 +60,17 @@ public class VulScanController
             Object obj=this.cls.newInstance();
             for(String pocName:pocs)
             {
-                Method method=this.cls.getMethod(pocName);
-                method.setAccessible(true);
-                method.invoke(obj,"1111111111");//不知道为什么这里会报错“没有这个方法异常？”
-                //method.invoke(obj(this.okHttpClient,target));
+                //如果获取的方法需要提供参数，那么就必须要提供参数类型。比如这里
+                Method method=this.cls.getMethod(pocName,OkHttpClient.class,String.class);
+                Boolean result=(Boolean) method.invoke(obj,this.okHttpClient,target);  //运行该方法的时候，也需要传递参数值
+                if(result)
+                {
+                    System.out.println(target+"存在"+pocName+"漏洞");
+                }
+                else
+                {
+                    System.out.println(target+"不存在"+pocName+"漏洞");
+                }
             }
         }
         catch (InstantiationException e)
@@ -123,6 +130,7 @@ public class VulScanController
             @RequestParam(value = "targetsInputFile",required = false) MultipartFile targetsInputFile
     )
     {
+
         return "readFileScan";
     }
 }

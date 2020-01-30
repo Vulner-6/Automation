@@ -99,7 +99,12 @@ public class UniversalScan
         return hashMap;
     }
 
-    public void testPrint(String str)
+    /**
+     * 用于测试反射能否正常执行
+     * @param okHttpClient
+     * @param str
+     */
+    public void testPrint(OkHttpClient okHttpClient,String str)
     {
         System.out.println("测试反射调用方法打印成功！"+str);
     }
