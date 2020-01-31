@@ -1,5 +1,6 @@
 package com.tools.automation.controller;
 
+import com.tools.automation.support.FileOperation;
 import com.tools.automation.support.HttpsUtils;
 import okhttp3.OkHttpClient;
 import org.springframework.stereotype.Controller;
@@ -8,6 +9,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -91,32 +96,7 @@ public class VulScanController
         }
 
 
-        /*
-        //判断目标提交方式:单个目标验证
-        if(target==null||target=="")
-        {
-            //判断复选框选择情况
-            if(pocs[0]=="selected")
-            {
-                UniversalScan universalScan=new UniversalScan();
-                Boolean result=universalScan.thinkPHP_RCE(okHttpClient,target);
-                System.out.println(result);
-            }
-        }
-        //判读目标提交方式：从txt文件中读取目标进行验证
-        if(targetsInputFile.isEmpty())
-        {
-            System.out.println("上传的文件内容为空");
-            return "singleScan";
-        }
-        //读取文件内容，进行批量验证
-        else
-        {
-            //存储上传的文件
-            FileOperation.storeFile(targetsInputFile,"E:\\Programming\\Projects\\automation\\uploadFiles\\");
-        }
 
-         */
         return "singleScan";
     }
 
@@ -127,10 +107,40 @@ public class VulScanController
     }
     @PostMapping("/readFileScan")
     public String readFileScan(
-            @RequestParam(value = "targetsInputFile",required = false) MultipartFile targetsInputFile
+            @RequestParam(value = "targetsInputFile",required = false) MultipartFile targetsInputFile,
+            @RequestParam(value = "poc",required = false) String[] pocs
     )
     {
-
+        //存储上传的文件到服务器上指定的绝对路径
+        if(targetsInputFile.isEmpty())
+        {
+            System.out.println("上传的文件内容为空");
+            return "readFileScan";
+        }
+        else
+        {
+            //存储上传的文件到指定路径
+            FileOperation.storeFile(targetsInputFile,"E:\\Programming\\Projects\\automation\\uploadFiles\\");
+        }
+        //读取上传的文件类容，
+        try
+        {
+            String filePath="E:\\Programming\\Projects\\automation\\uploadFiles\\"+targetsInputFile.getOriginalFilename();
+            BufferedReader in = new BufferedReader(new FileReader(filePath));
+            String tempStr;
+            while ((tempStr=in.readLine())!=null)
+            {
+                System.out.println(tempStr);
+            }
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IOException e2)
+        {
+            e2.printStackTrace();
+        }
         return "readFileScan";
     }
 }

@@ -7,6 +7,11 @@ import java.io.IOException;
 
 public class FileOperation
 {
+    /**
+     * 将上传的文件存储到指定位置
+     * @param targetsInputFile
+     * @param storePath
+     */
     public static void storeFile(MultipartFile targetsInputFile,String storePath)
     {
         //获取文件名
