@@ -119,7 +119,7 @@ public class UniversalScan
     {
         try
         {
-            Thread.currentThread().sleep(2000);
+            Thread.currentThread().sleep(20);
         }
         catch (InterruptedException e)
         {
