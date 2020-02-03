@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
 
 @Controller
 public class VulScanController
@@ -67,6 +68,8 @@ public class VulScanController
         {
             this.singleScanResult.put(pocName,false);
         }
+        //声明线程计数器数量，方便后面的异步传输
+        final CountDownLatch latch=new CountDownLatch(pocs.length);
         try
         {
             Object obj=this.cls.newInstance();
@@ -74,10 +77,18 @@ public class VulScanController
             {
                 //如果获取的方法需要提供参数，那么就必须要提供参数类型。比如这里
                 Method method=this.cls.getMethod(pocName,OkHttpClient.class,String.class,
-                        HashMap.class,Method.class);
-                method.invoke(obj,this.okHttpClient,target,this.singleScanResult,method);  //运行该方法的时候，也需要传递参数值
+                        HashMap.class,Method.class,CountDownLatch.class);
+                method.invoke(obj,this.okHttpClient,target,this.singleScanResult,method,latch);  //运行该方法的时候，也需要传递参数值
             }
             //测试打印结果
+            try
+            {
+                latch.await();  //等待异步验证全部结束，再执行这里的主线程
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
             System.out.println(singleScanResult);
         }
         catch (InstantiationException e)

