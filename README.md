@@ -1,7 +1,7 @@
 # 开发日志记录
 ## 2020.2.5 更新
 1.采用多线程、异步传输技术，重写了thinkphp5远程代码执行漏洞验证POC，极大的提高了扫描效率。<br>
-2.采用的Java中的反射原理，可以自动加载POC，增加了工扩展性。<br>
+2.采用的Java中的反射原理，可以自动加载POC，增加了工具的扩展性。<br>
 以后，如果想添加新的漏洞扫描POC，只需要按照指定的格式编写poc，该工具就可以自动加载。<br>
 ![image](https://github.com/Vulner-6/Automation/raw/master/images/singleScan.png)<br>
 
