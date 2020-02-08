@@ -1,8 +1,11 @@
 package com.tools.automation.controller;
 
+import com.tools.automation.mapper.ScanInfoMapper;
+import com.tools.automation.model.ScanInfo;
 import com.tools.automation.support.FileOperation;
 import com.tools.automation.support.HttpsUtils;
 import okhttp3.OkHttpClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,9 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 @Controller
@@ -27,7 +28,10 @@ public class VulScanController
     private OkHttpClient okHttpClient=httpsUtils.getTrustAllClient();
     private Class cls;
     private HashMap<String,Boolean> singleScanResult=new HashMap<String,Boolean>();  //存放单个目标，不同poc的扫描结果
-
+    @Autowired
+    private ScanInfo scanInfo;
+    @Autowired
+    private ScanInfoMapper scanInfoMapper;
     /**
      * 加载漏洞具体实现类进来。（我是一个漏洞写一个类呢？还是一个类中写多个漏洞的方法呢？）
      */
@@ -169,7 +173,28 @@ public class VulScanController
             System.out.println(singleScanResult);
         }
 
-
+        //将扫描结果保存到数据库中
+        scanInfo.setGmtCreate( Long.toString(System.currentTimeMillis()));
+        scanInfo.setGmtModify(Long.toString(System.currentTimeMillis()));
+        scanInfo.setTargetUrl(target);
+        String vulNames="";
+        int vulNum=0;
+        //遍历扫描结果
+        Iterator iter=this.singleScanResult.entrySet().iterator();
+        while (iter.hasNext())
+        {
+            Map.Entry entry=(Map.Entry)iter.next();
+            Object key=entry.getKey();
+            Object val=entry.getValue();
+            if((Boolean) val==true)
+            {
+                vulNames=vulNames+(String)key+",";
+                vulNum++;
+            }
+        }
+        this.scanInfo.setVulNum(vulNum);
+        this.scanInfo.setVulName(vulNames);
+        this.scanInfoMapper.insert(this.scanInfo);
         return "singleScan";
     }
 
