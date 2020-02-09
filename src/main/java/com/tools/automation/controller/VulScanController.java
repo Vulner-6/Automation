@@ -7,6 +7,7 @@ import com.tools.automation.support.HttpsUtils;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -68,7 +69,8 @@ public class VulScanController
     public String singleScan(
             @RequestParam(value = "target",required = false) String target,
             @RequestParam(value = "poc",required = false) String[] pocs,
-            @RequestParam(value = "allPoc",required = false) String allPoc
+            @RequestParam(value = "allPoc",required = false) String allPoc,
+            Model model
             )
     {
         //假如不是加载全部插件，而是加载用户自己勾选的插件
@@ -179,6 +181,7 @@ public class VulScanController
         scanInfo.setTargetUrl(target);
         String vulNames="";
         int vulNum=0;
+        ArrayList<String> vulResults=new ArrayList<String>();
         //遍历扫描结果
         Iterator iter=this.singleScanResult.entrySet().iterator();
         while (iter.hasNext())
@@ -189,12 +192,19 @@ public class VulScanController
             if((Boolean) val==true)
             {
                 vulNames=vulNames+(String)key+",";
+                vulResults.add((String) key);
                 vulNum++;
             }
         }
         this.scanInfo.setVulNum(vulNum);
         this.scanInfo.setVulName(vulNames);
         this.scanInfoMapper.insert(this.scanInfo);
+
+        //将漏洞信息渲染到前端
+        model.addAttribute("vulResults",vulResults);
+        model.addAttribute("targetUrl",target);
+        model.addAttribute("vulNum",vulNum);
+
         return "singleScan";
     }
 
