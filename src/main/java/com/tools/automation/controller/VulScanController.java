@@ -216,7 +216,8 @@ public class VulScanController
     @PostMapping("/readFileScan")
     public String readFileScan(
             @RequestParam(value = "targetsInputFile",required = false) MultipartFile targetsInputFile,
-            @RequestParam(value = "poc",required = false) String[] pocs
+            @RequestParam(value = "poc",required = false) String[] pocs,
+            @RequestParam(value = "allPoc",required = false) String allPoc
     )
     {
         //存储上传的文件到服务器上指定的绝对路径
@@ -236,15 +237,25 @@ public class VulScanController
             String filePath="E:\\Programming\\Projects\\automation\\uploadFiles\\"+targetsInputFile.getOriginalFilename();
             BufferedReader in = new BufferedReader(new FileReader(filePath));
             String tempStr;
-            while ((tempStr=in.readLine())!=null)
+            //假如不是加载全部插件，而是加载用户自己勾选的插件
+            if(pocs!=null&&pocs.length>0&&allPoc==null)
             {
-                //挨个对每个网站进行勾选的插件测试
-                for(String pocName : pocs)
+                while ((tempStr=in.readLine())!=null)
                 {
-                    //暂停到这里，我想想怎么提高扫描效率
+                    //挨个对每个网站进行勾选的插件测试
+                    for(String pocName : pocs)
+                    {
+                        //暂停到这里，我想想怎么提高扫描效率
+                    }
+                    System.out.println(tempStr);
                 }
-                System.out.println(tempStr);
             }
+            //假如加载全部poc
+            if(allPoc!=null&&allPoc.equals("selectAll"))
+            {
+
+            }
+
         }
         catch (FileNotFoundException e)
         {
