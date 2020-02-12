@@ -245,7 +245,7 @@ public class VulScanController
                     //挨个对每个网站进行勾选的插件测试
                     for(String pocName : pocs)
                     {
-                        //暂停到这里，我想想怎么提高扫描效率
+                        //如何解决url数量*poc最后的数量？因为没有总线程数，主线程何时才能继续？
                     }
                     System.out.println(tempStr);
                 }
