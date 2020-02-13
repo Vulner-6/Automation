@@ -246,6 +246,7 @@ public class VulScanController
                     for(String pocName : pocs)
                     {
                         //如何解决url数量*poc最后的数量？因为没有总线程数，主线程何时才能继续？
+                        //我这个验证脚本是否正确？
                     }
                     System.out.println(tempStr);
                 }
