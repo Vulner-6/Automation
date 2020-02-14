@@ -236,25 +236,54 @@ public class VulScanController
         {
             String filePath="E:\\Programming\\Projects\\automation\\uploadFiles\\"+targetsInputFile.getOriginalFilename();
             BufferedReader in = new BufferedReader(new FileReader(filePath));
+            //计算总共可以读取多少个目标
             String tempStr;
+            int txtSumLine=0;
+            while((tempStr=in.readLine())!=null)
+            {
+                txtSumLine++;
+            }
+            //计算如果全部勾选，需要提前生成多少个线程
+            int selectAllPoc=0;
+            Method[] methods=this.cls.getDeclaredMethods();
+            //利用set进行去重
+            Set<String> set=new HashSet<String>();
+            for(Method m:methods)
+            {
+                set.add(m.getName());
+            }
+            String[] uniqueResult=(String[])set.toArray(new String[set.size()]);
+            selectAllPoc=uniqueResult.length*txtSumLine;   //线程计数器应该记录这个数字，当加载全部插件时
+
+            //计算用户自己勾选要扫描的poc，应该提前声明的线程数量
+            int userSelectPoc=pocs.length*txtSumLine;
+
             //假如不是加载全部插件，而是加载用户自己勾选的插件
             if(pocs!=null&&pocs.length>0&&allPoc==null)
             {
+                //声明线程计数器数量，方便后面的异步传输
+                final CountDownLatch latch=new CountDownLatch(userSelectPoc);
                 while ((tempStr=in.readLine())!=null)
                 {
                     //挨个对每个网站进行勾选的插件测试
-                    for(String pocName : pocs)
+                    for(String methodName : pocs)
                     {
-                        //如何解决url数量*poc最后的数量？因为没有总线程数，主线程何时才能继续？
-                        //我这个验证脚本是否正确？
+                        this.singleScanResult.put(methodName,false); //得提前初始化一下扫描结果值
+                        Object obj=this.cls.newInstance();
+                        Method method=this.cls.getMethod(methodName,OkHttpClient.class,String.class,HashMap.class,
+                                Method.class,CountDownLatch.class);
+                        method.invoke(obj,this.okHttpClient,tempStr,this.singleScanResult,method,latch);
                     }
+                    //每次扫完一个网站后，返回这个网站扫描结果对象
+                    //今天写到这里暂停，明天接着写，将每次扫描的目标结果，存到二维数组里
                     System.out.println(tempStr);
                 }
             }
             //假如加载全部poc
             if(allPoc!=null&&allPoc.equals("selectAll"))
             {
-
+                //声明线程计数器数量，方便后面的异步传输
+                final CountDownLatch latch=new CountDownLatch(selectAllPoc);
             }
 
         }
@@ -265,6 +294,10 @@ public class VulScanController
         catch (IOException e2)
         {
             e2.printStackTrace();
+        }
+        catch (Exception e3)
+        {
+            e3.printStackTrace();
         }
         return "readFileScan";
     }
