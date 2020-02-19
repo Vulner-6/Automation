@@ -18,7 +18,6 @@ public class TestOkHttp3
             .writeTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build();
-
     /**
      * 测试同步GET请求
      */
